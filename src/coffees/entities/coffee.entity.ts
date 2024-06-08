@@ -3,6 +3,7 @@ import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, PrimaryGenerat
 import { Flavor } from "./flavor.entity";
 import { Drink } from "../../common/interfaces/drink.interface";
 import { CoffeeType } from "../../common/enums/coffee-type.enum";
+import { loggerMiddleware } from "../../common/middleware/loggerMiddleware";
 
 @Entity()
 @ObjectType({ description: 'Coffee model', implements: () => Drink })
@@ -11,6 +12,7 @@ export class Coffee implements Drink {
   @Field(() => ID, { description: 'Unique identifier'})
   id: number;
 
+  @Field({ middleware: [loggerMiddleware]})
   @Column()
   name: string;
 
