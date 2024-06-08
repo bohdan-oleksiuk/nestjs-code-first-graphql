@@ -1,5 +1,6 @@
-import { Resolver, Query, Args, ID } from "@nestjs/graphql";
+import { Resolver, Query, Args, ID, Mutation } from "@nestjs/graphql";
 import { Coffee } from "./entities/coffee.entity";
+import { CreateCoffeeInput } from "./dto/create-coffee.input";
 
 @Resolver()
 export class CoffeesResolver {
@@ -10,6 +11,11 @@ export class CoffeesResolver {
 
   @Query(() => Coffee, { name: 'coffee', nullable: true })
   async findOne(@Args('id', { type: () => ID }) id: number) {
+    return null;
+  }
+
+  @Mutation(() => Coffee, { name: 'createCoffee', nullable: true })
+  async create(@Args('createCoffeeInput') createCoffeeInput: CreateCoffeeInput) {
     return null;
   }
 }
