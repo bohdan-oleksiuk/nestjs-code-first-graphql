@@ -2,6 +2,7 @@ import { Field, ID, ObjectType } from "@nestjs/graphql";
 import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Flavor } from "./flavor.entity";
 import { Drink } from "../../common/interfaces/drink.interface";
+import { CoffeeType } from "../../common/enums/coffee-type.enum";
 
 @Entity()
 @ObjectType({ description: 'Coffee model', implements: () => Drink })
@@ -22,4 +23,7 @@ export class Coffee implements Drink {
 
   @CreateDateColumn()
   createdAt?: Date;
+
+  @Column({ nullable: true })
+  type?: CoffeeType;
 }
