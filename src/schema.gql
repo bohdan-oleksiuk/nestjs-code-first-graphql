@@ -2,13 +2,20 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+"""Flavor model"""
+type Flavor {
+  id: ID!
+  name: String!
+  coffees: [Coffee!]!
+}
+
 """Coffee model"""
 type Coffee {
   """Unique identifier"""
   id: ID!
   name: String!
   brand: String!
-  flavors: [String!]!
+  flavors: [Flavor!]
 }
 
 type Query {

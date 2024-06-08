@@ -4,13 +4,14 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Coffee } from "./entities/coffee.entity";
 import { Repository } from "typeorm";
 import { UserInputError } from "apollo-server-express";
-import { Args } from "@nestjs/graphql";
 import { UpdateCoffeeInput } from "./dto/update-coffee.input";
+import { Flavor } from "./entities/flavor.entity";
 
 @Injectable()
 export class CoffeesService {
   constructor(
     @InjectRepository(Coffee) private readonly coffeesRepo: Repository<Coffee>,
+    @InjectRepository(Flavor) private readonly flavorRepo: Repository<Flavor>,
   ) {}
 
   async findAll() {
@@ -26,14 +27,22 @@ export class CoffeesService {
   }
 
   async create(createCoffeeInput: CreateCoffeeInput) {
-    const coffee = this.coffeesRepo.create(createCoffeeInput);
+    const flavors = await Promise.all(
+      createCoffeeInput.flavors.map(name => this.preloadFlavorByName(name)),
+    );
+
+    const coffee = this.coffeesRepo.create({ ...createCoffeeInput, flavors });
     return this.coffeesRepo.save(coffee);
   }
 
   async update (id: number, updateCoffeeInput: UpdateCoffeeInput) {
+    const flavors = updateCoffeeInput.flavors && (await Promise.all(
+      updateCoffeeInput.flavors.map(name => this.preloadFlavorByName(name)),
+    ));
     const coffee = await this.coffeesRepo.preload({
       id,
       ...updateCoffeeInput,
+      flavors,
     });
     if (!coffee) {
       throw new UserInputError(`Coffee #${id} does not exist`);
@@ -44,5 +53,13 @@ export class CoffeesService {
   async remove (id: number) {
     const coffee = await this.findOne(id);
     return this.coffeesRepo.remove(coffee);
+  }
+
+  private async preloadFlavorByName(name: string): Promise<Flavor> {
+    const existingFlavor = await this.flavorRepo.findOne({ where: { name } });
+    if (existingFlavor) {
+      return existingFlavor;
+    }
+    return this.flavorRepo.create({ name });
   }
 }
