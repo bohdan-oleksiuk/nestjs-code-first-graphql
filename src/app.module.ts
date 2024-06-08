@@ -10,6 +10,8 @@ import { DateScalar } from "./common/scalars/date.scalar";
 import { Tea } from "./teas/entities/tea.entity";
 import { DrinksResolver } from './drinks/drinks.resolver';
 import { PubSubModule } from './pub-sub/pub-sub.module';
+import { DataloaderModule } from './dataloader/dataloader.module';
+import { DataloaderService } from "./dataloader/dataloader.service";
 
 @Module({
   imports: [
@@ -22,15 +24,24 @@ import { PubSubModule } from './pub-sub/pub-sub.module';
       database: 'postgres',
       autoLoadEntities: true,
       synchronize: true,
+      logging: ['query'],
     }),
-    GraphQLModule.forRoot<ApolloDriverConfig>({
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      // autoSchemaFile: true, // the schema can be generated on-the-fly in memory
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      buildSchemaOptions: {
-        orphanedTypes: [Tea],
+      imports: [DataloaderModule],
+      useFactory: (dataloaderService: DataloaderService) => {
+        return {
+          autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+          buildSchemaOptions: {
+            orphanedTypes: [Tea],
+          },
+          installSubscriptionHandlers: true,
+          context: () => ({
+            loaders: dataloaderService.getLoaders(),
+          }),
+        };
       },
-      installSubscriptionHandlers: true,
+      inject: [DataloaderService],
     }),
     CoffeesModule,
     PubSubModule,

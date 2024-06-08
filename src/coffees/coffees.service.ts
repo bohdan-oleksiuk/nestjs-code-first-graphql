@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { CreateCoffeeInput } from "./dto/create-coffee.input";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Coffee } from "./entities/coffee.entity";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { UserInputError } from "apollo-server-express";
 import { UpdateCoffeeInput } from "./dto/update-coffee.input";
 import { Flavor } from "./entities/flavor.entity";
@@ -65,5 +65,19 @@ export class CoffeesService {
       return existingFlavor;
     }
     return this.flavorRepo.create({ name });
+  }
+
+  async coffeesWithFlavors (ids: number[]) {
+    const data = await this.coffeesRepo.find({
+      select: ['id'],
+      relations: {
+        flavors: true,
+      },
+      where: {
+        id: In(ids as number[])
+      }
+    });
+
+    return data.map((coffee)=>coffee.flavors);
   }
 }

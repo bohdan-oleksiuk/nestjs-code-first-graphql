@@ -9,6 +9,7 @@ import { PubSubModule } from "../pub-sub/pub-sub.module";
 
 @Module({
   imports: [TypeOrmModule.forFeature([Coffee, Flavor]), PubSubModule],
-  providers: [CoffeesResolver, CoffeesService, CoffeeFlavorsResolver]
+  providers: [CoffeesResolver, CoffeesService, CoffeeFlavorsResolver],
+  exports: [CoffeesService],
 })
 export class CoffeesModule {}
